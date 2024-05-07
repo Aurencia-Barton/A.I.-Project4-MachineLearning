@@ -1,4 +1,5 @@
 import nn
+import numpy as np
 
 class PerceptronModel(object):
     def __init__(self, dimensions):
@@ -47,19 +48,35 @@ class PerceptronModel(object):
         """
         "*** YOUR CODE HERE ***"
         
+        max_iterations = 1000
+        iteration = 0
+        
         while True:
             errorFound = False
+            iteration += 1
+            
+            if iteration > max_iterations:
+                print("Exceeded maximum training iterations")
+                break
+            
             for x, y in dataset.iterate_once(1):
                 prediction = self.get_prediction(x)
                 actual = nn.as_scalar(y)
+                      
                 
                 if prediction != actual:
-                    direction = nn.Constant([[actual]])
-                    self.w.update(nn.DotProduct(direction, x), 1)
+                    #direction = nn.Constant(np.array([[actual]]))
+                    update_vector = np.array([[actual]]) * x.data
+                    update_node = nn.Constant(update_vector)
+                    self.w.update(update_node, 1)
                     errorFound = True
                     
-                    if not errorFound:
-                        break
+            if not errorFound:
+                break
+                    
+            print(f"Iteration {iteration}: Error found, continuing training")
+                    
+        print(f"Training completed in {iteration} iterations")
                     
 
 class RegressionModel(object):
