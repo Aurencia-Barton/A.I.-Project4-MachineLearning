@@ -292,6 +292,20 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.hiddenSize = 128 # hidden sized layer
+        
+        self.wInput = nn.Parameter(self.num_chars, self.hiddenSize)
+        self.bInput = nn.Parameter(1, self.hiddenSize)
+        
+        
+        self.wHidden = nn.Parameter(self.num_chars, self.hiddenSize)
+        self.bHidden = nn.Parameter(1, self.hiddenSize)
+        
+        
+
+
+        
+        
 
     def run(self, xs):
         """
