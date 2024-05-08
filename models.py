@@ -190,6 +190,15 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        
+        hidden_size1 = 200
+        hidden_size2 = 200
+        self.w1 = nn.Parameter(784, hidden_size1)
+        self.b1 = nn.Parameter(1, hidden_size1)
+        self.w2 = nn.Parameter(hidden_size1, hidden_size2)
+        self.b2 = nn.Parameter(1, hidden_size2)
+        self.w3 = nn.Parameter(hidden_size2, 10)
+        self.b3 = nn.Parameter(1, 10)
 
     def run(self, x):
         """
@@ -206,6 +215,18 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        
+        # First hidden layer
+        h1 = nn.ReLU(nn.AddBias(nn.Linear(x, self.w1), self.b1))
+
+        # Second hidden layer
+        h2 = nn.ReLU(nn.AddBias(nn.Linear(h1, self.w2), self.b2))
+
+        # Output layer (no ReLU activation)
+        output = nn.AddBias(nn.Linear(h2, self.w3), self.b3)
+
+        return output
+    
 
     def get_loss(self, x, y):
         """
@@ -221,12 +242,37 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        
+        predicted = self.run(x)
+        return nn.SoftmaxLoss(predicted, y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        
+        learningRate = 0.5
+        batchSize = 100
+        numEpochs = 10
+        
+        for epoch in range(numEpochs):
+            for xBatch, yBatch in dataset.iterate_once(batchSize):
+                loss = self.get_loss(xBatch, yBatch)
+                
+                gradients = nn.gradients(loss, [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3])
+                
+                self.w1.update(gradients[0], -learningRate)
+                self.b1.update(gradients[1], -learningRate)
+                self.w2.update(gradients[2], -learningRate)
+                self.b2.update(gradients[3], -learningRate)
+                self.w3.update(gradients[4], -learningRate)
+                self.b3.update(gradients[5], -learningRate)
+                
+            
+            validationAccuracy = dataset.get_validation_accuracy()
+            print(f"Epoch {epoch + 1}/{numEpochs}, Validation Accuracy: {validationAccuracy:.2%}")
+
 
 class LanguageIDModel(object):
     """
