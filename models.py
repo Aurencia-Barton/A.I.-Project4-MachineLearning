@@ -385,8 +385,6 @@ class LanguageIDModel(object):
                 # computing all parameters' gradients
                 gradients = nn.gradients(loss, [self.wInput, self.bInput, self.wHidden, self.bHidden, self.wOutput, self.bOutput])
 
-                
-
                 self.wInput.update(gradients[0], -learningRate) #parameters are updated
                 self.bInput.update(gradients[1], -learningRate)
                 
