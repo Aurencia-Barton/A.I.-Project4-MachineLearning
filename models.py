@@ -294,7 +294,8 @@ class LanguageIDModel(object):
         "*** YOUR CODE HERE ***"
         self.hiddenSize = 128 # hidden sized layer
         
-        self.wInput = nn.Parameter(self.num_chars, self.hiddenSize)
+        
+        self.wInput = nn.Parameter(self.num_chars, self.hiddenSize) #model parameters are initialized
         self.bInput = nn.Parameter(1, self.hiddenSize)
         
         
@@ -302,7 +303,8 @@ class LanguageIDModel(object):
         self.bHidden = nn.Parameter(1, self.hiddenSize)
         
         
-
+        self.wOuput = nn.Parameter(self.hiddenSize, self.num_languages)
+        self.bOutput = nn.Parameter(1, self.num_languages)
 
         
         
@@ -337,6 +339,16 @@ class LanguageIDModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        batchSize = xs[0].data.shape[0] #hidden state is initialized to zeros
+        h = nn.Constant([[0] * self.hiddenSize] * batchSize)
+        
+        
+        for x in xs:    #each character is processed in a sequence
+            z = nn.Add( nn.Linear(x, self.wInput), nn.Linear(h, self.wHidden))
+            h = nn.ReLU(nn.AddBias(z, self.bHidden))
+            output = nn.AddBias(nn.Linear(h, self.wOuput), self.bOutput) #computing the output scores
+             
+            return output
 
     def get_loss(self, xs, y):
         """
