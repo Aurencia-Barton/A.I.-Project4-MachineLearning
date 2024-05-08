@@ -303,7 +303,7 @@ class LanguageIDModel(object):
         self.bHidden = nn.Parameter(1, self.hiddenSize)
         
         
-        self.wOuput = nn.Parameter(self.hiddenSize, self.num_languages)
+        self.wOutput = nn.Parameter(self.hiddenSize, self.num_languages)
         self.bOutput = nn.Parameter(1, self.num_languages)
 
         
@@ -346,7 +346,7 @@ class LanguageIDModel(object):
         for x in xs:    #each character is processed in a sequence
             z = nn.Add( nn.Linear(x, self.wInput), nn.Linear(h, self.wHidden))
             h = nn.ReLU(nn.AddBias(z, self.bHidden))
-            output = nn.AddBias(nn.Linear(h, self.wOuput), self.bOutput) #computing the output scores
+            output = nn.AddBias(nn.Linear(h, self.wOutput), self.bOutput) #computing the output scores
              
             return output
 
@@ -365,9 +365,36 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        predicted = self.run(xs)
+        return nn.SoftmaxLoss(predicted, y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        learningRate = 0.1
+        batchSize = 100
+        numEpochs = 10
+        
+        for epoch in range(numEpochs):
+            for xs, y in dataset.iterate_once(batchSize):
+                
+                loss = self.get_loss(xs, y)
+                
+                # computing all parameters' gradients
+                gradients = nn.gradients(loss, [self.wInput, self.bInput, self.wHidden, self.bHidden, self.wOutput, self.bOutput])
+
+                
+
+                self.wInput.update(gradients[0], -learningRate) #parameters are updated
+                self.bInput.update(gradients[1], -learningRate)
+                
+                self.wHidden.update(gradients[2], -learningRate)
+                self.bHidden.update(gradients[3], -learningRate)
+                
+                self.wOutput.update(gradients[4], -learningRate)
+                self.bOutput.update(gradients[5], -learningRate)
+        
+        validationAccuracy = dataset.getValidationAccuracy() #Validation Accuracy at each epoch prints to terminal.
+        print(f"Epoch {epoch + 1}/{numEpochs}, Validation Accuracy: {validationAccuracy:.2%}")
