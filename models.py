@@ -292,6 +292,8 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.num_languages = len(self.languages) #output classes
+        
         self.hiddenSize = 128 # hidden sized layer
         
         
@@ -340,7 +342,7 @@ class LanguageIDModel(object):
         """
         "*** YOUR CODE HERE ***"
         batchSize = xs[0].data.shape[0] #hidden state is initialized to zeros
-        h = nn.Constant([[0] * self.hiddenSize] * batchSize)
+        h = nn.Constant(np.zeros((batchSize, self.hiddenSize)))
         
         
         for x in xs:    #each character is processed in a sequence
@@ -385,6 +387,8 @@ class LanguageIDModel(object):
                 # computing all parameters' gradients
                 gradients = nn.gradients(loss, [self.wInput, self.bInput, self.wHidden, self.bHidden, self.wOutput, self.bOutput])
 
+                
+
                 self.wInput.update(gradients[0], -learningRate) #parameters are updated
                 self.bInput.update(gradients[1], -learningRate)
                 
@@ -394,5 +398,6 @@ class LanguageIDModel(object):
                 self.wOutput.update(gradients[4], -learningRate)
                 self.bOutput.update(gradients[5], -learningRate)
         
+
         validationAccuracy = dataset.getValidationAccuracy() #Validation Accuracy at each epoch prints to terminal.
         print(f"Epoch {epoch + 1}/{numEpochs}, Validation Accuracy: {validationAccuracy:.2%}")
