@@ -294,14 +294,15 @@ class LanguageIDModel(object):
         "*** YOUR CODE HERE ***"
         self.num_languages = len(self.languages) #output classes
         
+        
         self.hiddenSize = 128 # hidden sized layer
         
-        
+        #model paramaters have been initialized
         self.wInput = nn.Parameter(self.num_chars, self.hiddenSize) #model parameters are initialized
         self.bInput = nn.Parameter(1, self.hiddenSize)
         
         
-        self.wHidden = nn.Parameter(self.num_chars, self.hiddenSize)
+        self.wHidden = nn.Parameter(self.hiddenSize, self.hiddenSize)
         self.bHidden = nn.Parameter(1, self.hiddenSize)
         
         
@@ -348,9 +349,9 @@ class LanguageIDModel(object):
         for x in xs:    #each character is processed in a sequence
             z = nn.Add( nn.Linear(x, self.wInput), nn.Linear(h, self.wHidden))
             h = nn.ReLU(nn.AddBias(z, self.bHidden))
-            output = nn.AddBias(nn.Linear(h, self.wOutput), self.bOutput) #computing the output scores
-             
-            return output
+            
+        output = nn.AddBias(nn.Linear(h, self.wOutput), self.bOutput) #computing the output scores  
+        return output
 
     def get_loss(self, xs, y):
         """
@@ -399,5 +400,5 @@ class LanguageIDModel(object):
                 self.bOutput.update(gradients[5], -learningRate)
         
 
-        validationAccuracy = dataset.getValidationAccuracy() #Validation Accuracy at each epoch prints to terminal.
-        print(f"Epoch {epoch + 1}/{numEpochs}, Validation Accuracy: {validationAccuracy:.2%}")
+        validation_accuracy = dataset.get_validation_accuracy() #Validation Accuracy at each epoch prints to terminal.
+        print(f"Epoch {epoch + 1}/{numEpochs}, Validation Accuracy: {validation_accuracy:.2%}")
