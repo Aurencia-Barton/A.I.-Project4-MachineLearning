@@ -88,6 +88,19 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        
+        hidden_size1 = 1024
+        hidden_size2 = 512
+        hidden_size3 = 512
+        self.w1 = nn.Parameter(1, hidden_size1)
+        self.b1 = nn.Parameter(1, hidden_size1)
+        self.w2 = nn.Parameter(hidden_size1, hidden_size2)
+        self.b2 = nn.Parameter(1, hidden_size2)
+        self.w3 = nn.Parameter(hidden_size2, hidden_size3)
+        self.b3 = nn.Parameter(1, hidden_size3)
+        self.w4 = nn.Parameter(hidden_size3, 1)
+        self.b4 = nn.Parameter(1, 1)
+        
 
     def run(self, x):
         """
@@ -99,6 +112,19 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        # First hidden layer
+        h1 = nn.ReLU(nn.AddBias(nn.Linear(x, self.w1), self.b1))
+
+        # Second hidden layer
+        h2 = nn.ReLU(nn.AddBias(nn.Linear(h1, self.w2), self.b2))
+        
+         # Third hidden layer
+        h3 = nn.ReLU(nn.AddBias(nn.Linear(h2, self.w3), self.b3))
+        
+        #output layer
+        output = nn.AddBias(nn.Linear(h3, self.w4), self.b4)
+
+        return output
 
     def get_loss(self, x, y):
         """
@@ -111,12 +137,41 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        predicted = self.run(x)
+        return nn.SquareLoss(predicted, y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        learningRate = 0.1
+        batchSize = 100
+        numEpochs = 500
+        
+        for epoch in range(numEpochs):
+            for xBatch, yBatch in dataset.iterate_once(batchSize):
+            
+                loss = self.get_loss(xBatch, yBatch) #computing the loss
+            
+            
+                gradients = nn.gradients(loss, [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3, self.w4, self.b4])
+            
+                self.w1.update(gradients[0], -learningRate) #paramters are updating
+                self.b1.update(gradients[1], -learningRate)
+                self.w2.update(gradients[2], -learningRate)
+                self.b2.update(gradients[3], -learningRate)
+                self.w3.update(gradients[4], -learningRate)
+                self.b3.update(gradients[5], -learningRate)
+                self.w4.update(gradients[6], -learningRate)
+                self.b4.update(gradients[7], -learningRate)
+
+                
+            
+            #the loss of each epoch is printed. 
+            epochLoss = nn.as_scalar(loss)
+            print(f"Epoch {epoch + 1}/ {numEpochs}, Loss: {epochLoss}")
+            
 
 class DigitClassificationModel(object):
     """
